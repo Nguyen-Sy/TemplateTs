@@ -1,1 +1,1 @@
-npx mrm lint-staged
+npm run lint-staged

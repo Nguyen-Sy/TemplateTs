@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "lint-staged": "lint-staged"
   },
   "keywords": [],

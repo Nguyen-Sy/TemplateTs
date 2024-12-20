@@ -1,7 +1,7 @@
-import config from "src/config";
+import config from "@config/index";
 import { NextFunction, Request, Response } from "express";
 
-import { NodeEnv } from "../constant/config";
+import { NodeEnv } from "../constant";
 import { HttpError, NotFoundError } from "../lib/http/httpError";
 
 export const handleNotFound = (

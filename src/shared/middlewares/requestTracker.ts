@@ -1,5 +1,5 @@
 import config from "@config/index";
-import { NodeEnv } from "@shared/constant/config";
+import { NodeEnv } from "@shared/constant";
 import logger from "@shared/lib/logger";
 import * as lodash from "lodash";
 import { v4 as uuidV4 } from "uuid";

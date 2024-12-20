@@ -1,5 +1,5 @@
 import config from "@config/index";
-import { NodeEnv } from "@shared/constant/config";
+import { NodeEnv } from "@shared/constant";
 import util from "util";
 import { createLogger, format, Logger } from "winston";
 import { Console } from "winston/lib/winston/transports";

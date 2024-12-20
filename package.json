@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "nodemon",
     "prepare": "husky || true",
-    "lint-staged": "lint-staged"
+    "lint-staged": "lint-staged",
+    "build": "rimraf dist && tsc && tsc-alias",
+    "start": "yarn run build && node ./dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -29,7 +31,10 @@
     "lint-staged": "^15.2.10",
     "nodemon": "^3.1.7",
     "prettier": "^3.4.1",
+    "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
+    "tsc": "^2.0.4",
+    "tsc-alias": "^1.8.10",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.17.0"
   },

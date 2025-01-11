@@ -21,7 +21,7 @@ app.use(
     ),
 );
 
-app.use(router);
+app.use("/api/v1", router);
 app.use(handleNotFound);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use(handleError as any);

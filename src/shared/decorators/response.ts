@@ -2,12 +2,13 @@ import {
     CreatedHttpResponse,
     OkHttpResponse,
 } from "@shared/lib/http/httpResponse";
+import { camelCaseToWords } from "@shared/utils/string";
 import { NextFunction, Request, Response } from "express";
 
 export function OkResponse(message?: string) {
     return function (
         _target: unknown,
-        _propertyKey: string,
+        propertyKey: string,
         descriptor: PropertyDescriptor,
     ) {
         const originalMethod = descriptor.value;
@@ -17,7 +18,10 @@ export function OkResponse(message?: string) {
             next: NextFunction,
         ) {
             const result = await originalMethod.apply(this, [req, res, next]);
-            return new OkHttpResponse(result, message).send(res);
+            return new OkHttpResponse(
+                result,
+                message ?? `${camelCaseToWords(propertyKey)} successfully`,
+            ).send(res);
         };
     };
 }

@@ -14,6 +14,13 @@ export interface Config {
         refreshTokenSecretKey: string;
         refreshTokenExpiresIn: StringValue;
     };
+    redis: {
+        host: string;
+        port: number;
+        password?: string;
+        username?: string;
+        db: number;
+    };
 }
 
 const envSchema = joi.object({
@@ -29,6 +36,13 @@ const envSchema = joi.object({
         refreshTokenSecretKey: joi.string().required(),
         refreshTokenExpiresIn: joi.string().default("7d"),
     }),
+    redis: joi.object({
+        host: joi.string().default("localhost"),
+        port: joi.number().default(6379),
+        password: joi.string().optional(),
+        username: joi.string().optional(),
+        db: joi.number().default(0),
+    }),
 });
 
 const initConfig = () => {
@@ -41,6 +55,13 @@ const initConfig = () => {
                 accessTokenExpiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
                 refreshTokenSecretKey: process.env.REFRESH_TOKEN_SECRET_KEY,
                 refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
+            },
+            redis: {
+                host: process.env.REDIS_HOST,
+                port: process.env.REDIS_PORT,
+                password: process.env.REDIS_PASSWORD,
+                username: process.env.REDIS_USERNAME,
+                db: process.env.REDIS_DB,
             },
         },
         {

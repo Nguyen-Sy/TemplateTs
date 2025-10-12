@@ -43,6 +43,9 @@ const envSchema = joi.object({
         username: joi.string().optional(),
         db: joi.number().default(0),
     }),
+    mongo: joi.object({
+        uri: joi.string().required(),
+    }),
 });
 
 const initConfig = () => {
@@ -62,6 +65,9 @@ const initConfig = () => {
                 password: process.env.REDIS_PASSWORD,
                 username: process.env.REDIS_USERNAME,
                 db: process.env.REDIS_DB,
+            },
+            mongo: {
+                uri: process.env.MONGO_URI,
             },
         },
         {

@@ -4,7 +4,29 @@ import { createLogger, format, transports } from "winston";
 
 import { AppContext } from "../context";
 
-const initFormat = () => {
+const initDevFormat = () => {
+    return format.printf(
+        ({ level, source, message, timestamp, userId, requestId, stack }) => {
+            let messageString = `${level}: [${timestamp}]\nSource: ${source}\nMessage: ${message}\n`;
+            if (userId) {
+                messageString += `User ID: ${userId as string}\n`;
+            }
+            if (requestId) {
+                messageString += `Request ID: ${requestId as string}\n`;
+            }
+            if (stack) {
+                messageString += `Stack: ${stack as string}\n`;
+            }
+            return messageString;
+        },
+    );
+};
+
+const initProdFormat = () => {
+    return format.json();
+};
+
+const initBaseFormat = () => {
     const formats = [
         format((info) => {
             const { context, level, message, timestamp, source, stack } = info;
@@ -26,32 +48,10 @@ const initFormat = () => {
             if (stack) {
                 result.stack = stack;
             }
+
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return result as any;
         })(),
-        format.printf(
-            ({
-                level,
-                source,
-                message,
-                timestamp,
-                userId,
-                requestId,
-                stack,
-            }) => {
-                let messageString = `${level}: [${timestamp}]\nSource: ${source}\nMessage: ${message}\n`;
-                if (userId) {
-                    messageString += `User ID: ${userId as string}\n`;
-                }
-                if (requestId) {
-                    messageString += `Request ID: ${requestId as string}\n`;
-                }
-                if (stack) {
-                    messageString += `Stack: ${stack as string}\n`;
-                }
-                return messageString;
-            },
-        ),
     ];
     return formats;
 };
@@ -61,19 +61,19 @@ const initErrorStackFormat = () => {
 };
 
 const initLogger = (env: NodeEnv) => {
-    const customFormat = initFormat();
+    const baseFormat = initBaseFormat();
     const errorFormat = initErrorStackFormat();
     const formats = [
         format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
         ...errorFormat,
-        ...customFormat,
+        ...baseFormat,
     ];
 
     if (env === NodeEnv.DEV) {
         formats.unshift(format.colorize());
+        formats.push(initDevFormat());
     } else {
-        formats.pop();
-        formats.push(format.json());
+        formats.push(initProdFormat());
     }
 
     const logger = createLogger({

@@ -1,119 +1,93 @@
 import config from "@config/index";
 import { NodeEnv } from "@shared/constant";
-import util from "util";
-import { createLogger, format, Logger } from "winston";
-import { Console } from "winston/lib/winston/transports";
-import DailyRotateFile from "winston-daily-rotate-file";
+import { createLogger, format, transports } from "winston";
 
-interface AdditionMessageParams {
-    context: string;
-    requestId: string;
-}
+import { AppContext } from "../context";
 
-type Message =
-    | string
-    | object
-    | number
-    | boolean
-    | Message[]
-    | { [key: string]: Message };
-
-class CustomLogger {
-    logger: Logger;
-    constructor(writeLogFile: boolean = config.writeLogFile) {
-        this.logger = createLogger({
-            level: "debug",
-        });
-
-        if (writeLogFile) {
-            this.initProd();
-        } else {
-            this.initDev();
-        }
-    }
-
-    private initDev() {
-        const formatCustom = format.printf(
+const initFormat = () => {
+    const formats = [
+        format((info) => {
+            const { context, level, message, timestamp, source, stack } = info;
+            const result: Record<string, unknown> = {
+                level,
+                source,
+                message,
+                timestamp,
+            };
+            if (context) {
+                const { jwtPayload, requestId } = context as AppContext;
+                if (jwtPayload) {
+                    result.userId = jwtPayload.userId;
+                }
+                if (requestId) {
+                    result.requestId = requestId;
+                }
+            }
+            if (stack) {
+                result.stack = stack;
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return result as any;
+        })(),
+        format.printf(
             ({
                 level,
+                source,
                 message,
-                context = null,
-                requestId = null,
                 timestamp,
+                userId,
+                requestId,
+                stack,
             }) => {
-                const requestIdLog = requestId
-                    ? `\n\tRequestId: ${requestId}`
-                    : "";
-                const contextLog = context ? `\n\tContext: ${context}` : "";
-                message =
-                    typeof message === "string"
-                        ? message
-                        : util.inspect(message, { colors: true });
-
-                return `${level} :: ${timestamp} : ${message} ${requestIdLog} ${contextLog}`;
+                let messageString = `${level}: [${timestamp}]\nSource: ${source}\nMessage: ${message}\n`;
+                if (userId) {
+                    messageString += `User ID: ${userId as string}\n`;
+                }
+                if (requestId) {
+                    messageString += `Request ID: ${requestId as string}\n`;
+                }
+                if (stack) {
+                    messageString += `Stack: ${stack as string}\n`;
+                }
+                return messageString;
             },
-        );
+        ),
+    ];
+    return formats;
+};
 
-        const errorStackFormat = format((info) => {
-            if (info.stack) {
-                console.error(info.stack);
-                return false;
-            }
-            return info;
-        });
+const initErrorStackFormat = () => {
+    return [format.errors({ stack: true })];
+};
 
-        const consoleTransport = new Console({
-            format: format.combine(
-                format.colorize(),
-                format.simple(),
-                format.timestamp({ format: "DD/MM/YYYY HH:mm:ss" }),
-                errorStackFormat(),
-                formatCustom,
-            ),
-        });
-        this.logger.add(consoleTransport);
+const initLogger = (env: NodeEnv) => {
+    const customFormat = initFormat();
+    const errorFormat = initErrorStackFormat();
+    const formats = [
+        format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+        ...errorFormat,
+        ...customFormat,
+    ];
+
+    if (env === NodeEnv.DEV) {
+        formats.unshift(format.colorize());
+    } else {
+        formats.pop();
+        formats.push(format.json());
     }
 
-    private initProd() {
-        const fileFormat = format.combine(
-            format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-            format.json(),
-        );
-        const errTransport = new DailyRotateFile({
-            dirname: "./logs",
-            filename: "error-%DATE%.log",
-            datePattern: "YYYY-MM-DD-HH",
-            maxSize: "20m",
-            maxFiles: "14d",
-            format: fileFormat,
-            level: "error",
-        });
-        const infoTransport = new DailyRotateFile({
-            dirname: "./logs",
-            filename: "combined-%DATE%.log",
-            datePattern: "YYYY-MM-DD-HH",
-            maxSize: "20m",
-            maxFiles: "14d",
-            format: fileFormat,
-        });
-        this.logger.add(errTransport);
-        this.logger.add(infoTransport);
-    }
+    const logger = createLogger({
+        level: env === NodeEnv.DEV ? "debug" : "info",
+        transports: [
+            new transports.Console({
+                format: format.combine(...formats),
+            }),
+        ],
+    });
+    return logger.child({
+        source: "app",
+    });
+};
 
-    info = (message: Message, params?: Partial<AdditionMessageParams>) => {
-        this.logger.info({ message, ...params });
-    };
-
-    error = (message: Message, params?: Partial<AdditionMessageParams>) => {
-        this.logger.error({ message, ...params });
-    };
-
-    debug = (message: Message, params?: Partial<AdditionMessageParams>) => {
-        if (config.nodeEnv === NodeEnv.DEV) {
-            this.logger.debug({ message, ...params });
-        }
-    };
-}
-
-const logger = new CustomLogger();
-export default logger;
+const appLogger = initLogger(config.nodeEnv);
+export default appLogger;

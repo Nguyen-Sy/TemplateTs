@@ -11,7 +11,7 @@ export const requestTracker = (
     next: NextFunction,
 ) => {
     req.headers["x-request-id"] = req.headers["x-request-id"] ?? uuidV4();
-    const loggerFields = ["body"];
+    const loggerFields = ["body", "params", "query"];
     if (config.nodeEnv === NodeEnv.DEV) {
         loggerFields.forEach((field) =>
             requestLogger(lodash.get(req, field), field),

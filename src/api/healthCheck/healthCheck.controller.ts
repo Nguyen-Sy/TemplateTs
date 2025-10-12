@@ -1,12 +1,14 @@
 import { OkResponse } from "@shared/decorators/response";
-import { NextFunction, Request, Response } from "express";
+import { extractContext } from "@shared/lib/context";
+import { Request } from "express";
 
 import healthCheckService from "./healthCheck.service";
 
 class HealthCheckController {
     @OkResponse()
-    async get(_req: Request, _res: Response, _next: NextFunction) {
-        return healthCheckService.get();
+    async get(req: Request) {
+        const context = extractContext(req);
+        return healthCheckService.get(context);
     }
 }
 

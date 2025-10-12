@@ -11,19 +11,21 @@ interface IValidateSchema {
 
 export const validator = (params?: IValidateSchema) => {
     return (req: Request, _res: Response, next: NextFunction) => {
-        validate(req.body, next, params?.body);
-        validate(req.query, next, params?.query);
-        validate(req.params, next, params?.params);
+        req.body = validate(req.body, next, params?.body);
+        req.query = validate(req.query, next, params?.query);
+        req.params = validate(req.params, next, params?.params);
         next();
     };
 };
 
 const validate = (req: unknown, next: NextFunction, schema?: Schema) => {
     if (schema) {
-        const { error } = schema.validate(req, {
+        const { error, value } = schema.validate(req, {
             abortEarly: false,
             convert: true,
         });
         if (error) next(new BadRequestError(error.message));
+        return value;
     }
+    return req;
 };

@@ -20,6 +20,22 @@ export default [
             import: importPlugin,
         },
         rules: {
+            "prefer-const": "error",
+            "prefer-arrow-callback": "error",
+            "no-useless-return": "error",
+            "no-useless-concat": "error",
+            "eqeqeq": ["error", "always"],
+            "no-eval": "error",
+            "no-implied-eval": "error",
+            "no-console": "error",
+            "max-lines-per-function": [
+                "error",
+                {
+                    max: 45,
+                    skipBlankLines: true,
+                    skipComments: true,
+                },
+            ],
             "import/newline-after-import": ["error", { count: 1 }],
             "import/no-duplicates": ["error", { "prefer-inline": true }],
             "import/first": "error",

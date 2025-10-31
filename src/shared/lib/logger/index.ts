@@ -1,25 +1,39 @@
 import config from "@config/index";
-import { NodeEnv } from "@shared/constant";
+import { NodeEnv } from "@shared/enums";
+import util from "util";
 import { createLogger, format, transports } from "winston";
 
-import { AppContext } from "../context";
+import { RequestContext } from "../context";
 
 const initDevFormat = () => {
-    return format.printf(
-        ({ level, source, message, timestamp, userId, requestId, stack }) => {
-            let messageString = `${level}: [${timestamp}]\nSource: ${source}\nMessage: ${message}\n`;
-            if (userId) {
-                messageString += `User ID: ${userId as string}\n`;
-            }
-            if (requestId) {
-                messageString += `Request ID: ${requestId as string}\n`;
-            }
-            if (stack) {
-                messageString += `Stack: ${stack as string}\n`;
-            }
-            return messageString;
-        },
-    );
+    return format.printf((info) => {
+        const { level, message, requestId, source, stack, timestamp, userId } =
+            info;
+
+        const formattedMessage =
+            typeof message === "object"
+                ? util.inspect(message, { colors: true, depth: null })
+                : message;
+
+        let messageString = `${level}: [${timestamp}]
+Source: ${source}
+Message: ${formattedMessage}
+`;
+
+        if (userId) {
+            messageString += `User ID: ${userId}\n`;
+        }
+
+        if (requestId) {
+            messageString += `Request ID: ${requestId}\n`;
+        }
+
+        if (stack) {
+            messageString += `Stack: ${stack}\n`;
+        }
+
+        return messageString;
+    });
 };
 
 const initProdFormat = () => {
@@ -29,30 +43,42 @@ const initProdFormat = () => {
 const initBaseFormat = () => {
     const formats = [
         format((info) => {
-            const { context, level, message, timestamp, source, stack } = info;
+            const { context, error } = info;
+
             const result: Record<string, unknown> = {
-                level,
-                source,
-                message,
-                timestamp,
+                ...info,
             };
+
             if (context) {
-                const { jwtPayload, requestId } = context as AppContext;
+                const { jwtPayload, requestId } = context as RequestContext;
+
                 if (jwtPayload) {
                     result.userId = jwtPayload.userId;
                 }
+
                 if (requestId) {
                     result.requestId = requestId;
                 }
             }
-            if (stack) {
-                result.stack = stack;
+
+            if (error instanceof Error) {
+                result.stack = (error.stack ?? "")
+                    .split("\n")
+                    .filter(
+                        (line, index) =>
+                            index === 0 || !line.includes("node_modules"),
+                    )
+                    .slice(0, 3)
+                    .join("\n");
             }
+
+            delete result.context;
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return result as any;
         })(),
     ];
+
     return formats;
 };
 
@@ -63,6 +89,7 @@ const initErrorStackFormat = () => {
 const initLogger = (env: NodeEnv) => {
     const baseFormat = initBaseFormat();
     const errorFormat = initErrorStackFormat();
+
     const formats = [
         format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
         ...errorFormat,
@@ -84,10 +111,12 @@ const initLogger = (env: NodeEnv) => {
             }),
         ],
     });
+
     return logger.child({
         source: "app",
     });
 };
 
 const appLogger = initLogger(config.nodeEnv);
+
 export default appLogger;

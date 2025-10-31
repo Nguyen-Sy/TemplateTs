@@ -1,12 +1,12 @@
-import { Schema } from "joi";
 import { NextFunction, Request, Response } from "express";
+import { Schema } from "joi";
 
 import { BadRequestError } from "../lib/http/httpError";
 
 interface IValidateSchema {
     body?: Schema;
-    query?: Schema;
     params?: Schema;
+    query?: Schema;
 }
 
 export const validator = (params?: IValidateSchema) => {

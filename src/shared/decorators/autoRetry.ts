@@ -1,9 +1,9 @@
 import logger from "@shared/lib/logger";
-import { delay } from "@shared/utils/delay";
+import { sleep } from "@shared/utils/sleep";
 
 export function AutoRetry(
     retryTimes: number = 5,
-    delayTime: number | null = null, // Millisecond
+    sleepTime: null | number = null, // Millisecond
 ) {
     return function (
         _target: unknown,
@@ -20,7 +20,7 @@ export function AutoRetry(
                         `${propertyKey} auto retry times left: ${retryTimes}`,
                     );
                     retryTimes -= 1;
-                    if (delayTime) await delay(delayTime);
+                    if (sleepTime) await sleep(sleepTime);
                     logger.error((error as Error).message);
                 }
             } while (retryTimes > 0);

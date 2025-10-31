@@ -1,4 +1,3 @@
-import appLogger from "@shared/lib/logger";
 import { NextFunction, Request, Response } from "express";
 
 import { HttpError, NotFoundError } from "../lib/http/httpError";
@@ -17,10 +16,9 @@ export const handleError = (
     res: Response,
     _next: NextFunction,
 ) => {
-    appLogger.error(error);
     return res.status(error.statusCode ?? 500).json({
+        data: null,
         message: error.message,
         statusCode: error.statusCode,
-        data: null,
     });
 };

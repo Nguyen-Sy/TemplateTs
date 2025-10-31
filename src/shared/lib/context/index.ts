@@ -1,16 +1,15 @@
-import lodash from "lodash";
-import { Request } from "express";
+import { AsyncLocalStorage } from "async_hooks";
 
 import { JwtPayload } from "../jwt";
 
-export type AppContext = {
-    requestId: string;
+export type RequestContext = {
     jwtPayload?: JwtPayload;
+    requestId: string;
 };
 
-export const extractContext = (req: Request): AppContext => {
-    return {
-        requestId: req.headers["x-request-id"] as string,
-        jwtPayload: lodash.get(req, "user"),
-    };
+export const requestContextStorage = new AsyncLocalStorage<RequestContext>();
+export const extractContext = () => {
+    const context = requestContextStorage.getStore();
+    if (!context) throw new Error("Request context not found");
+    return context;
 };

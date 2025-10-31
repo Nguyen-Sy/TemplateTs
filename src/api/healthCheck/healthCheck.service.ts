@@ -1,13 +1,9 @@
 import { BaseService } from "@shared/lib/base/service";
-import { AppContext } from "@shared/lib/context";
+import { BadRequestError } from "@shared/lib/http/httpError";
 
 class HealthCheckService extends BaseService {
-    get = (context: AppContext) => {
-        this.logger.info({
-            context,
-            message: "Health check service",
-        });
-        return { hello: "world" };
+    get = () => {
+        throw new BadRequestError("Test error");
     };
 }
 

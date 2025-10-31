@@ -1,18 +1,22 @@
+import type { StringValue } from "ms";
+
 import config from "@config/index";
 import jwtLib from "jsonwebtoken";
-import type { StringValue } from "ms";
 
 export type JwtPayload = {
     userId: string;
 };
+export type JwtTokenType = "access" | "refresh";
+export type OptionalJwtTokenType = `${JwtTokenType}-optional`;
+export type TokenTypes = JwtTokenType | OptionalJwtTokenType;
 
 export class Jwt {
     constructor(
         private readonly configs: {
-            accessTokenSecretKey: string;
             accessTokenExpiresIn: StringValue;
-            refreshTokenSecretKey: string;
+            accessTokenSecretKey: string;
             refreshTokenExpiresIn: StringValue;
+            refreshTokenSecretKey: string;
         },
     ) {}
 
@@ -21,23 +25,23 @@ export class Jwt {
             payload,
             this.configs.accessTokenSecretKey,
             {
-                expiresIn: this.configs.accessTokenExpiresIn,
                 algorithm: "HS256",
+                expiresIn: this.configs.accessTokenExpiresIn,
             },
         );
         const refreshToken = jwtLib.sign(
             payload,
             this.configs.refreshTokenSecretKey,
             {
-                expiresIn: this.configs.refreshTokenExpiresIn,
                 algorithm: "HS256",
+                expiresIn: this.configs.refreshTokenExpiresIn,
             },
         );
 
         return { accessToken, refreshToken };
     }
 
-    async verifyToken(token: string, type: "access" | "refresh") {
+    verifyToken(token: string, type: JwtTokenType) {
         try {
             const result = jwtLib.verify(
                 token,

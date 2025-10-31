@@ -1,6 +1,6 @@
 import { Request } from "express";
+import lodash from "lodash";
 
 export const extractRequest = <T>(req: Request, field: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (req as any)[field] as unknown as T;
+    return lodash.get(req, field) as T;
 };

@@ -1,6 +1,5 @@
 import pluginJs from "@eslint/js";
-import importPlugin from "eslint-plugin-import";
-import simpleImportSort from "eslint-plugin-simple-import-sort";
+import perfectionist from "eslint-plugin-perfectionist";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
@@ -8,6 +7,7 @@ export default [
     { languageOptions: { globals: globals.browser } },
     pluginJs.configs.recommended,
     ...tseslint.configs.recommended,
+    perfectionist.configs["recommended-alphabetical"],
     {
         languageOptions: {
             parserOptions: {
@@ -15,30 +15,8 @@ export default [
                 sourceType: "module",
             },
         },
-        plugins: {
-            "simple-import-sort": simpleImportSort,
-            import: importPlugin,
-        },
         rules: {
-            "prefer-const": "error",
-            "prefer-arrow-callback": "error",
-            "no-useless-return": "error",
-            "no-useless-concat": "error",
-            "eqeqeq": ["error", "always"],
-            "no-eval": "error",
-            "no-implied-eval": "error",
-            "no-console": "error",
-            "max-lines-per-function": [
-                "error",
-                {
-                    max: 45,
-                    skipBlankLines: true,
-                    skipComments: true,
-                },
-            ],
-            "import/newline-after-import": ["error", { count: 1 }],
-            "import/no-duplicates": ["error", { "prefer-inline": true }],
-            "import/first": "error",
+            // 🧠 TypeScript
             "@typescript-eslint/no-unused-vars": [
                 "error",
                 {
@@ -47,24 +25,28 @@ export default [
                     caughtErrors: "all",
                     caughtErrorsIgnorePattern: "^_",
                     destructuredArrayIgnorePattern: "^_",
-                    varsIgnorePattern: "^_",
                     ignoreRestSiblings: true,
+                    varsIgnorePattern: "^_",
                 },
             ],
-            "simple-import-sort/imports": [
+            eqeqeq: ["error", "always"],
+            "max-lines-per-function": [
                 "error",
                 {
-                    groups: [
-                        ["^@nestjs", "^@?\\w", "^express"],
-                        ["^(@|modules)(/.*|$)"],
-                        ["^\\u0000"],
-                        ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
-                        ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"],
-                    ],
+                    max: 45,
+                    skipBlankLines: true,
+                    skipComments: true,
                 },
             ],
-            "simple-import-sort/exports": ["error"],
-            "import/prefer-default-export": "off",
+            "no-console": "error",
+            "no-eval": "error",
+            "no-implied-eval": "error",
+            "no-useless-concat": "error",
+            "no-useless-return": "error",
+            "prefer-arrow-callback": "error",
+
+            // 🧹 General clean code rules
+            "prefer-const": "error",
         },
     },
 ];

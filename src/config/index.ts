@@ -1,73 +1,73 @@
-import { NodeEnv } from "@shared/constant";
+import type { StringValue } from "ms";
+
+import { NodeEnv } from "@shared/enums";
 import * as dotenv from "dotenv";
 import joi from "joi";
-import type { StringValue } from "ms";
 
 dotenv.config();
 
 export interface Config {
-    port: number;
-    nodeEnv: NodeEnv;
     jwt: {
-        accessTokenSecretKey: string;
         accessTokenExpiresIn: StringValue;
-        refreshTokenSecretKey: string;
+        accessTokenSecretKey: string;
         refreshTokenExpiresIn: StringValue;
+        refreshTokenSecretKey: string;
     };
+    nodeEnv: NodeEnv;
+    port: number;
     redis: {
-        host: string;
-        port: number;
-        password?: string;
-        username?: string;
         db: number;
+        host: string;
+        password?: string;
+        port: number;
+        username?: string;
     };
 }
 
 const envSchema = joi.object({
-    port: joi.number().default(3000),
+    jwt: joi.object({
+        accessTokenExpiresIn: joi.string().default("1h"),
+        accessTokenSecretKey: joi.string().required(),
+        refreshTokenExpiresIn: joi.string().default("7d"),
+        refreshTokenSecretKey: joi.string().required(),
+    }),
+    mongo: joi.object({
+        uri: joi.string().required(),
+    }),
     nodeEnv: joi
         .string()
         .valid(NodeEnv.DEV, NodeEnv.STAG, NodeEnv.PROD)
         .default(NodeEnv.DEV),
-
-    jwt: joi.object({
-        accessTokenSecretKey: joi.string().required(),
-        accessTokenExpiresIn: joi.string().default("1h"),
-        refreshTokenSecretKey: joi.string().required(),
-        refreshTokenExpiresIn: joi.string().default("7d"),
-    }),
+    port: joi.number().default(3000),
     redis: joi.object({
-        host: joi.string().default("localhost"),
-        port: joi.number().default(6379),
-        password: joi.string().optional(),
-        username: joi.string().optional(),
         db: joi.number().default(0),
-    }),
-    mongo: joi.object({
-        uri: joi.string().required(),
+        host: joi.string().default("localhost"),
+        password: joi.string().optional(),
+        port: joi.number().default(6379),
+        username: joi.string().optional(),
     }),
 });
 
 const initConfig = () => {
     const { error, value: env } = envSchema.validate(
         {
-            port: process.env.PORT,
-            nodeEnv: process.env.NODE_ENV,
             jwt: {
-                accessTokenSecretKey: process.env.ACCESS_TOKEN_SECRET_KEY,
                 accessTokenExpiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
-                refreshTokenSecretKey: process.env.REFRESH_TOKEN_SECRET_KEY,
+                accessTokenSecretKey: process.env.ACCESS_TOKEN_SECRET_KEY,
                 refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
-            },
-            redis: {
-                host: process.env.REDIS_HOST,
-                port: process.env.REDIS_PORT,
-                password: process.env.REDIS_PASSWORD,
-                username: process.env.REDIS_USERNAME,
-                db: process.env.REDIS_DB,
+                refreshTokenSecretKey: process.env.REFRESH_TOKEN_SECRET_KEY,
             },
             mongo: {
                 uri: process.env.MONGO_URI,
+            },
+            nodeEnv: process.env.NODE_ENV,
+            port: process.env.PORT,
+            redis: {
+                db: process.env.REDIS_DB,
+                host: process.env.REDIS_HOST,
+                password: process.env.REDIS_PASSWORD,
+                port: process.env.REDIS_PORT,
+                username: process.env.REDIS_USERNAME,
             },
         },
         {

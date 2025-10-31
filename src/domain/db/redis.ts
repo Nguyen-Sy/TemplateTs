@@ -3,22 +3,29 @@ import appLogger from "@shared/lib/logger";
 import Redis, { RedisOptions } from "ioredis";
 
 class RedisClient {
-    private static instance: Redis | null = null;
+    private static instance: null | Redis = null;
     private constructor() {}
+
+    public static async disconnect(): Promise<void> {
+        if (RedisClient.instance) {
+            await RedisClient.instance.quit();
+            RedisClient.instance = null;
+        }
+    }
 
     public static getInstance(options?: RedisOptions): Redis {
         if (!RedisClient.instance) {
             const defaultOptions: RedisOptions = {
-                host: config.redis.host,
-                port: config.redis.port,
-                password: config.redis.password,
-                username: config.redis.username,
                 db: config.redis.db,
+                host: config.redis.host,
+                maxRetriesPerRequest: 3,
+                password: config.redis.password,
+                port: config.redis.port,
                 retryStrategy: (times: number) => {
                     const delay = Math.min(times * 50, 2000);
                     return delay;
                 },
-                maxRetriesPerRequest: 3,
+                username: config.redis.username,
             };
 
             const redisOptions = { ...defaultOptions, ...options };
@@ -38,13 +45,6 @@ class RedisClient {
         }
 
         return RedisClient.instance;
-    }
-
-    public static async disconnect(): Promise<void> {
-        if (RedisClient.instance) {
-            await RedisClient.instance.quit();
-            RedisClient.instance = null;
-        }
     }
 
     public static isConnected(): boolean {

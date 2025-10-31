@@ -1,16 +1,25 @@
-import { PaginationDto } from "@shared/interface";
+import { SortEnum } from "@shared/enums";
+import { Comparable, ObjectLiteral, PaginationDto } from "@shared/types";
 
 export const paginate = (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    items: Record<string, any>[],
-    paginateOption: PaginationDto = { page: 1, limit: 20 },
+    items: ObjectLiteral[],
+    paginateOption?: PaginationDto,
 ) => {
+    paginateOption = paginateOption ?? { limit: 20, page: 1 };
+
     const totalPage = Math.ceil(items.length / paginateOption.limit);
     if (paginateOption.orderBy !== undefined) {
+        const sort =
+            paginateOption.sort?.toLowerCase() === SortEnum.asc ? 1 : -1;
+
         items = items.sort((a, b) => {
             const key = paginateOption.orderBy as string;
-            if (paginateOption.sort === "ASC") return a[key] > b[key] ? 1 : -1;
-            return a[key] < b[key] ? 1 : -1;
+            const aVal = a[key] as Comparable;
+            const bVal = b[key] as Comparable;
+
+            if (aVal > bVal) return sort;
+            if (aVal < bVal) return -sort;
+            return 0;
         });
     }
 
@@ -20,9 +29,9 @@ export const paginate = (
     );
 
     return {
-        totalPage,
-        limit: paginateOption.limit,
         currentPage: paginateOption.page,
         items,
+        limit: paginateOption.limit,
+        totalPage,
     };
 };

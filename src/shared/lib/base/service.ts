@@ -1,18 +1,13 @@
 import appRedis from "@domain/db/redis";
 import appRepos, { AppRepos } from "@domain/repo";
 import Redis from "ioredis";
-import { Logger } from "winston";
 
-import appLogger from "../logger";
+import { Base } from "./base";
 
-export abstract class BaseService {
-    protected readonly logger: Logger;
-    protected readonly redis: Redis = appRedis;
+export abstract class BaseService extends Base {
     protected readonly repos: AppRepos = appRepos;
+}
 
-    constructor() {
-        this.logger = appLogger.child({
-            source: this.constructor.name,
-        });
-    }
+export abstract class BaseServiceWithRedis extends BaseService {
+    protected readonly redis: Redis = appRedis;
 }

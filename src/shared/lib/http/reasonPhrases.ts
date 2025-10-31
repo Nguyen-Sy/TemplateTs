@@ -121,6 +121,12 @@ export default {
      */
     METHOD_NOT_ALLOWED: "Method Not Allowed",
     /**
+     * Official Documentation @ https://datatracker.ietf.org/doc/html/rfc7540#section-9.1.2
+     *
+     * Defined in the specification of HTTP/2 to indicate that a server is not able to produce a response for the combination of scheme and authority that are included in the request URI.
+     */
+    MISDIRECTED_REQUEST: "Misdirected Request",
+    /**
      * Official Documentation @ https://tools.ietf.org/html/rfc7231#section-6.4.2
      *
      * This response code means that URI of requested resource has been changed. Probably, new URI would be given in the response.
@@ -335,10 +341,4 @@ export default {
      * Was defined in a previous version of the HTTP specification to indicate that a requested response must be accessed by a proxy. It has been deprecated due to security concerns regarding in-band configuration of a proxy.
      */
     USE_PROXY: "Use Proxy",
-    /**
-     * Official Documentation @ https://datatracker.ietf.org/doc/html/rfc7540#section-9.1.2
-     *
-     * Defined in the specification of HTTP/2 to indicate that a server is not able to produce a response for the combination of scheme and authority that are included in the request URI.
-     */
-    MISDIRECTED_REQUEST: "Misdirected Request",
 };

@@ -1,9 +1,8 @@
 import router from "@api/app.route";
 import { handleError, handleNotFound } from "@shared/middlewares/errorHandler";
 import { requestTracker } from "@shared/middlewares/requestTracker";
+import express, { ErrorRequestHandler } from "express";
 import morgan from "morgan";
-import express from "express";
-
 import "@domain/db";
 
 const app = express();
@@ -23,7 +22,7 @@ app.use(
 
 app.use("/api/v1", router);
 app.use(handleNotFound);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-app.use(handleError as any);
+
+app.use(handleError as unknown as ErrorRequestHandler);
 
 export default app;

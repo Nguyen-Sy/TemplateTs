@@ -9,12 +9,18 @@ export abstract class BaseRepo<T extends BaseModel> {
     });
     constructor(protected readonly model: Model<T>) {}
 
-    async findById(id: string): Promise<T | null> {
-        const item = await this.model.findById(id);
-        if (item?.deletedAt) {
-            return null;
-        }
-        return item;
+    async create(data: Partial<T> | Partial<T>[]): Promise<T | T[]> {
+        const items = await this.model.create(data);
+        return items as T | T[];
+    }
+
+    async delete(id: string): Promise<null | T> {
+        const item = await this.model.findByIdAndUpdate(
+            id,
+            { deletedAt: new Date() },
+            { new: true },
+        );
+        return item as null | T;
     }
 
     async find(query: FilterQuery<T>): Promise<T[]> {
@@ -27,34 +33,28 @@ export abstract class BaseRepo<T extends BaseModel> {
         return items as T[];
     }
 
-    async findOne(query: FilterQuery<T>): Promise<T | null> {
+    async findById(id: string): Promise<null | T> {
+        const item = await this.model.findById(id);
+        if (item?.deletedAt) {
+            return null;
+        }
+        return item;
+    }
+
+    async findOne(query: FilterQuery<T>): Promise<null | T> {
         const item = await this.model.findOne(query).lean();
-        return item as T | null;
+        return item as null | T;
     }
 
-    async create(data: Partial<T> | Partial<T>[]): Promise<T | T[]> {
-        const items = await this.model.create(data);
-        return items as T | T[];
+    async hardDelete(id: string): Promise<null | T> {
+        const item = await this.model.findByIdAndDelete(id);
+        return item as null | T;
     }
 
-    async update(id: string, data: Partial<T>): Promise<T | null> {
+    async update(id: string, data: Partial<T>): Promise<null | T> {
         const item = await this.model.findByIdAndUpdate(id, data, {
             new: true,
         });
-        return item as T | null;
-    }
-
-    async delete(id: string): Promise<T | null> {
-        const item = await this.model.findByIdAndUpdate(
-            id,
-            { deletedAt: new Date() },
-            { new: true },
-        );
-        return item as T | null;
-    }
-
-    async hardDelete(id: string): Promise<T | null> {
-        const item = await this.model.findByIdAndDelete(id);
-        return item as T | null;
+        return item as null | T;
     }
 }

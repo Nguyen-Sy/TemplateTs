@@ -1,6 +1,6 @@
 export type BaseModel = {
-    id: string;
-    deletedAt: Date | null;
     createdAt: Date;
+    deletedAt: Date | null;
+    id: string;
     updatedAt: Date;
 };

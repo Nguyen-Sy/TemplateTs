@@ -3,17 +3,17 @@ import { model, Schema } from "mongoose";
 import { BaseModel } from "./base.model";
 
 export type User = {
-    name: string;
     email: string;
+    name: string;
     password: string;
 } & BaseModel;
 
 export const UserSchema = new Schema<User>(
     {
-        name: { type: String, required: true },
-        email: { type: String, required: true },
-        password: { type: String, required: true },
-        deletedAt: { type: Date, default: null },
+        deletedAt: { default: null, type: Date },
+        email: { required: true, type: String },
+        name: { required: true, type: String },
+        password: { required: true, type: String },
     },
     {
         timestamps: true,

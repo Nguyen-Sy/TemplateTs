@@ -1,47 +1,48 @@
-import { NodeEnv } from "@shared/constant";
+import type { StringValue } from "ms";
+
+import { NodeEnv } from "@shared/enums";
 import * as dotenv from "dotenv";
 import joi from "joi";
-import type { StringValue } from "ms";
 
 dotenv.config();
 
 export interface Config {
-    port: number;
-    nodeEnv: NodeEnv;
     jwt: {
-        accessTokenSecretKey: string;
         accessTokenExpiresIn: StringValue;
-        refreshTokenSecretKey: string;
+        accessTokenSecretKey: string;
         refreshTokenExpiresIn: StringValue;
+        refreshTokenSecretKey: string;
     };
+    nodeEnv: NodeEnv;
+    port: number;
 }
 
 const envSchema = joi.object({
-    port: joi.number().default(3000),
+    jwt: joi.object({
+        accessTokenExpiresIn: joi.string().default("1h"),
+        accessTokenSecretKey: joi.string().required(),
+        refreshTokenExpiresIn: joi.string().default("7d"),
+        refreshTokenSecretKey: joi.string().required(),
+    }),
     nodeEnv: joi
         .string()
         .valid(NodeEnv.DEV, NodeEnv.STAG, NodeEnv.PROD)
         .default(NodeEnv.DEV),
 
-    jwt: joi.object({
-        accessTokenSecretKey: joi.string().required(),
-        accessTokenExpiresIn: joi.string().default("1h"),
-        refreshTokenSecretKey: joi.string().required(),
-        refreshTokenExpiresIn: joi.string().default("7d"),
-    }),
+    port: joi.number().default(3000),
 });
 
 const initConfig = () => {
     const { error, value: env } = envSchema.validate(
         {
-            port: process.env.PORT,
-            nodeEnv: process.env.NODE_ENV,
             jwt: {
-                accessTokenSecretKey: process.env.ACCESS_TOKEN_SECRET_KEY,
                 accessTokenExpiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
-                refreshTokenSecretKey: process.env.REFRESH_TOKEN_SECRET_KEY,
+                accessTokenSecretKey: process.env.ACCESS_TOKEN_SECRET_KEY,
                 refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
+                refreshTokenSecretKey: process.env.REFRESH_TOKEN_SECRET_KEY,
             },
+            nodeEnv: process.env.NODE_ENV,
+            port: process.env.PORT,
         },
         {
             abortEarly: false,

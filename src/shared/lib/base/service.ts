@@ -1,13 +1,3 @@
-import { Logger } from "winston";
+import { Base } from "./base";
 
-import appLogger from "../logger";
-
-export abstract class BaseService {
-    protected readonly logger: Logger;
-
-    constructor() {
-        this.logger = appLogger.child({
-            source: this.constructor.name,
-        });
-    }
-}
+export abstract class BaseService extends Base {}

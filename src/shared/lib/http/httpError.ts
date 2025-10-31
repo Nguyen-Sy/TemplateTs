@@ -24,19 +24,19 @@ export class ConflictError extends HttpError {
     }
 }
 
-export class UnauthorizedError extends HttpError {
+export class NotFoundError extends HttpError {
     constructor(
-        message: string = reasonPhrases.UNAUTHORIZED,
-        statusCode: number = statusCodes.UNAUTHORIZED,
+        message: string = reasonPhrases.NOT_FOUND,
+        statusCode: number = statusCodes.NOT_FOUND,
     ) {
         super(message, statusCode);
     }
 }
 
-export class NotFoundError extends HttpError {
+export class UnauthorizedError extends HttpError {
     constructor(
-        message: string = reasonPhrases.NOT_FOUND,
-        statusCode: number = statusCodes.NOT_FOUND,
+        message: string = reasonPhrases.UNAUTHORIZED,
+        statusCode: number = statusCodes.UNAUTHORIZED,
     ) {
         super(message, statusCode);
     }

@@ -1,12 +1,12 @@
 import config from "@config/index";
-import { NodeEnv } from "@shared/constant";
+import { NodeEnv } from "@shared/enums";
 import { createLogger, format, transports } from "winston";
 
 import { AppContext } from "../context";
 
 const initDevFormat = () => {
     return format.printf(
-        ({ level, source, message, timestamp, userId, requestId, stack }) => {
+        ({ level, message, requestId, source, stack, timestamp, userId }) => {
             let messageString = `${level}: [${timestamp}]\nSource: ${source}\nMessage: ${message}\n`;
             if (userId) {
                 messageString += `User ID: ${userId as string}\n`;
@@ -29,11 +29,11 @@ const initProdFormat = () => {
 const initBaseFormat = () => {
     const formats = [
         format((info) => {
-            const { context, level, message, timestamp, source, stack } = info;
+            const { context, level, message, source, stack, timestamp } = info;
             const result: Record<string, unknown> = {
                 level,
-                source,
                 message,
+                source,
                 timestamp,
             };
             if (context) {

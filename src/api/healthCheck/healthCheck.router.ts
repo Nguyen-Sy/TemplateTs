@@ -1,4 +1,4 @@
-import { asyncWrapper } from "@shared/utils/asyncWrapper";
+import { asyncWrapper } from "@shared/helper/asyncWrapper";
 import express from "express";
 
 import healthCheckController from "./healthCheck.controller";

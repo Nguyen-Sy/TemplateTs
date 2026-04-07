@@ -1,6 +1,5 @@
 import { Logger } from "winston";
 
-import { RequestContext } from "../context";
 import appLogger from "../logger";
 
 export abstract class Base {
@@ -10,17 +9,5 @@ export abstract class Base {
         this.logger = appLogger.child({
             source: this.constructor.name,
         });
-    }
-
-    protected logError<T = Error>(context: RequestContext, error: T) {
-        if (error instanceof Error) {
-            this.logger.error({
-                context,
-                message: error.message,
-                stack: error.stack,
-            });
-        } else {
-            this.logger.error(error);
-        }
     }
 }

@@ -1,5 +1,4 @@
 import config from "@config/index";
-import { NodeEnv } from "@shared/enums";
 import { requestContextStorage } from "@shared/lib/context";
 import logger from "@shared/lib/logger";
 import { NextFunction, Request, Response } from "express";
@@ -17,7 +16,7 @@ export const requestTracker = (
     });
 
     const loggerFields = ["body", "params", "query"];
-    if (config.nodeEnv === NodeEnv.DEV) {
+    if (config.nodeEnv === "DEV") {
         for (const field of loggerFields) {
             requestLogger(lodash.get(req, field), field);
         }

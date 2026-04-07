@@ -1,5 +1,5 @@
 import config from "@config/index";
-import { NodeEnv } from "@shared/enums";
+import { NodeEnv } from "@shared/types";
 import util from "util";
 import { createLogger, format, transports } from "winston";
 
@@ -96,7 +96,7 @@ const initLogger = (env: NodeEnv) => {
         ...baseFormat,
     ];
 
-    if (env === NodeEnv.DEV) {
+    if (env === "DEV") {
         formats.unshift(format.colorize());
         formats.push(initDevFormat());
     } else {
@@ -104,7 +104,7 @@ const initLogger = (env: NodeEnv) => {
     }
 
     const logger = createLogger({
-        level: env === NodeEnv.DEV ? "debug" : "info",
+        level: env === "DEV" ? "debug" : "info",
         transports: [
             new transports.Console({
                 format: format.combine(...formats),

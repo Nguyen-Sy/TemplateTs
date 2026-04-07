@@ -1,4 +1,4 @@
-import router from "@api/app.route";
+import router from "@api/app.router";
 import { handleError, handleNotFound } from "@shared/middlewares/errorHandler";
 import { requestTracker } from "@shared/middlewares/requestTracker";
 import express, { ErrorRequestHandler } from "express";
@@ -20,7 +20,7 @@ app.use(
     ),
 );
 
-app.use("/api/v1", router);
+app.use("/api", router);
 app.use(handleNotFound);
 
 app.use(handleError as unknown as ErrorRequestHandler);

@@ -1,5 +1,8 @@
 {
-    "watch": ["src", ".env"],
+    "watch": [
+        "src",
+        ".env"
+    ],
     "ext": ".ts,.js",
     "ignore": [],
     "exec": "npx ts-node -r tsconfig-paths/register src/index.ts"

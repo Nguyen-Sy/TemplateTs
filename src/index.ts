@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import config from "@config/index";
 import logger from "@shared/lib/logger";
 

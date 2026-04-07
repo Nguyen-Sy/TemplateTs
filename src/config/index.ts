@@ -1,45 +1,65 @@
-import type { StringValue } from "ms";
-
-import { NodeEnv } from "@shared/enums";
 import * as dotenv from "dotenv";
 import joi from "joi";
 
+import type { Config } from "./type";
+
 dotenv.config();
 
-export interface Config {
-    jwt: {
-        accessTokenExpiresIn: StringValue;
-        accessTokenSecretKey: string;
-        refreshTokenExpiresIn: StringValue;
-        refreshTokenSecretKey: string;
-    };
-    nodeEnv: NodeEnv;
-    port: number;
-}
-
-const envSchema = joi.object({
-    jwt: joi.object({
-        accessTokenExpiresIn: joi.string().default("1h"),
-        accessTokenSecretKey: joi.string().required(),
-        refreshTokenExpiresIn: joi.string().default("7d"),
-        refreshTokenSecretKey: joi.string().required(),
+const envSchema = joi.object<Config>({
+    auth: joi.object({
+        jwt: joi.object({
+            accessTokenExpiresIn: joi.string().default("1h"),
+            accessTokenSecretKey: joi.string().required(),
+            refreshTokenExpiresIn: joi.string().default("7d"),
+            refreshTokenSecretKey: joi.string().required(),
+        }),
     }),
-    nodeEnv: joi
-        .string()
-        .valid(NodeEnv.DEV, NodeEnv.STAG, NodeEnv.PROD)
-        .default(NodeEnv.DEV),
-
+    db: joi.object({
+        postgres: joi.object({
+            database: joi.string().required(),
+            host: joi.string().required(),
+            password: joi.string().required(),
+            port: joi.number().required(),
+            username: joi.string().required(),
+        }),
+        redis: joi.object({
+            db: joi.number().required(),
+            host: joi.string().required(),
+            password: joi.string().default(""),
+            port: joi.number().required(),
+            username: joi.string().default(""),
+        }),
+    }),
+    nodeEnv: joi.string().valid("DEV", "STAG", "PROD").default("DEV"),
     port: joi.number().default(3000),
 });
 
 const initConfig = () => {
-    const { error, value: env } = envSchema.validate(
+    const validated = envSchema.validate(
         {
-            jwt: {
-                accessTokenExpiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
-                accessTokenSecretKey: process.env.ACCESS_TOKEN_SECRET_KEY,
-                refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
-                refreshTokenSecretKey: process.env.REFRESH_TOKEN_SECRET_KEY,
+            auth: {
+                jwt: {
+                    accessTokenExpiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
+                    accessTokenSecretKey: process.env.ACCESS_TOKEN_SECRET_KEY,
+                    refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
+                    refreshTokenSecretKey: process.env.REFRESH_TOKEN_SECRET_KEY,
+                },
+            },
+            db: {
+                postgres: {
+                    database: process.env.POSTGRES_DATABASE,
+                    host: process.env.POSTGRES_HOST,
+                    password: process.env.POSTGRES_PASSWORD,
+                    port: process.env.POSTGRES_PORT,
+                    username: process.env.POSTGRES_USERNAME,
+                },
+                redis: {
+                    db: process.env.REDIS_DB,
+                    host: process.env.REDIS_HOST,
+                    password: process.env.REDIS_PASSWORD,
+                    port: process.env.REDIS_PORT,
+                    username: process.env.REDIS_USERNAME,
+                },
             },
             nodeEnv: process.env.NODE_ENV,
             port: process.env.PORT,
@@ -49,11 +69,12 @@ const initConfig = () => {
             convert: true,
         },
     );
-
-    if (error) {
-        throw new Error(`Invalid environment variables: ${error.message}`);
+    if (validated.error) {
+        throw new Error(
+            `Invalid environment variables: ${validated.error.message}`,
+        );
     }
-    return env as Config;
+    return validated.value;
 };
 
 const config = initConfig();

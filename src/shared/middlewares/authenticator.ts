@@ -5,18 +5,15 @@ import { NextFunction, Request, Response } from "express";
 
 export const authenticator = (type: TokenTypes) => {
     return (req: Request, _res: Response, next: NextFunction) => {
-        const authorizationHeader = req.headers.authorization;
-        if (!authorizationHeader) return next(new UnauthorizedError());
-
         const isOptional = type.endsWith("-optional");
+
+        const authorizationHeader = req.headers.authorization;
+        if (!authorizationHeader)
+            return isOptional ? next() : next(new UnauthorizedError());
+
         const tokenType = type.split("-")[0] as JwtTokenType;
         const token = authorizationHeader.split(" ")[1];
-
-        if (!token) {
-            if (isOptional) return next();
-        } else {
-            return next(new UnauthorizedError());
-        }
+        if (!token) return isOptional ? next() : next(new UnauthorizedError());
 
         const jwtPayload = jwt.verifyToken(token, tokenType);
         if (!jwtPayload) return next(new UnauthorizedError());

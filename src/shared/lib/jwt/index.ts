@@ -56,5 +56,5 @@ export class Jwt {
     }
 }
 
-const jwt = new Jwt(config.jwt);
+const jwt = new Jwt(config.auth.jwt);
 export default jwt;
